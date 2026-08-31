@@ -137,7 +137,7 @@ body {
 /* ---------- Responsive ---------- */
 
 @media (max-width: 480px) {
-  .brand-mark { height: 22px; }
+  .brand-mark { height: auto; }
   .beliefs-list li { padding: 20px 0; }
 }
 
