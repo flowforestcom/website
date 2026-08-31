@@ -21,12 +21,13 @@ html {
 }
 
 body {
-  margin: 0;
+  margin: 0 auto;
   background: var(--white);
   color: var(--ink);
   font-family: var(--font-body);
   font-weight: 400;
   line-height: 1.5;
+  max-width: 1200px;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -64,15 +65,41 @@ body {
 /* ---------- Hero ---------- */
 
 .hero {
-  padding: clamp(64px, 14vw, 148px) var(--edge) clamp(56px, 10vw, 100px);
-  max-width: 780px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(24px, 4vw, 48px);
+  min-height: calc(100svh - 64px - var(--edge));
+  padding: clamp(32px, 6vw, 64px) var(--edge);
+  /* width: 100vw;
+  max-width: none;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw); */
+}
+
+.hero-icon {
+  flex: 1 1 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+}
+
+.hero-mark {
+  width: 100%;
+  max-width: min(42vw, 420px);
+  height: auto;
+  display: block;
 }
 
 .tagline {
+  flex: 1 1 50%;
   margin: 0;
+  min-width: 0;
   font-weight: 600;
   letter-spacing: -0.02em;
-  font-size: clamp(2.1rem, 5.4vw, 4.1rem);
+  font-size: clamp(1.75rem, 3.6vw, 3.25rem);
   line-height: 1.12;
   color: var(--black);
 }
@@ -136,8 +163,32 @@ body {
 
 /* ---------- Responsive ---------- */
 
+@media (max-width: 768px) {
+  .hero {
+    flex-direction: column;
+    justify-content: center;
+    min-height: auto;
+    padding-top: clamp(48px, 10vw, 80px);
+    padding-bottom: clamp(48px, 10vw, 80px);
+  }
+
+  .hero-icon,
+  .tagline {
+    flex: none;
+    width: 100%;
+  }
+
+  .hero-mark {
+    max-width: min(72vw, 320px);
+  }
+
+  .tagline {
+    font-size: clamp(2rem, 8vw, 2.75rem);
+  }
+}
+
 @media (max-width: 480px) {
-  .brand-mark { height: auto; }
+  .brand-mark { width: 100% }
   .beliefs-list li { padding: 20px 0; }
 }
 
