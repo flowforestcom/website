@@ -48,7 +48,10 @@ body {
 /* ---------- Header ---------- */
 
 .site-header {
-  padding: var(--edge) var(--edge) 0;
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 10;
+  padding: var(--edge) calc(var(--edge) + max(0px, (100vw - 1200px) / 2)) 0;
 }
 
 .brand {
@@ -65,16 +68,31 @@ body {
 /* ---------- Hero ---------- */
 
 .hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   display: flex;
   flex-direction: row-reverse;
   align-items: center;
   gap: clamp(24px, 4vw, 48px);
-  min-height: calc(100svh - 64px - var(--edge));
-  padding: clamp(32px, 6vw, 64px) var(--edge);
-  /* width: 100vw;
+  min-height: 100svh;
+  padding: clamp(32px, 6vw, 64px) calc(var(--edge) + max(0px, (100vw - 1200px) / 2));
+  width: 100vw;
   max-width: none;
   margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw); */
+  margin-right: calc(50% - 50vw);
+  background-color: var(--white);
+  background-image:
+    linear-gradient(to left, var(--white) 0%, rgba(255, 255, 255, 0.96) 24%, rgba(255, 255, 255, 0) 68%),
+    url("hero.png");
+  background-position: center, center;
+  background-size: cover, cover;
+  background-repeat: no-repeat, no-repeat;
+}
+
+.hero > * {
+  position: relative;
+  z-index: 1;
 }
 
 .hero-icon {
