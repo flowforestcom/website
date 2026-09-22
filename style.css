@@ -51,7 +51,9 @@ body {
   position: fixed;
   inset: 0 0 auto;
   z-index: 10;
-  padding: var(--edge) calc(var(--edge) + max(0px, (100vw - 1200px) / 2)) 0;
+  padding: 1rem calc(var(--edge) + max(0px, (100vw - 1200px) / 2)) 1rem;
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(3px);
 }
 
 .brand {
@@ -60,7 +62,7 @@ body {
 }
 
 .brand-mark {
-  height: 64px;
+  height: 37px;
   width: auto;
   display: block;
 }
