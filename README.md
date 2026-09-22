@@ -6,7 +6,7 @@ Static marketing site for [Flowforest](https://flowforest.com) — local-first t
 
 - `index.html` — landing page
 - `style.css` — styles
-- `logo.svg`, `favicon.svg` — branding
+- `logo.svg`, `favicon.png` — branding
 - `_headers` — security headers (Cloudflare Pages)
 
 ## Local preview
