@@ -8,7 +8,7 @@
 <link rel="icon" href="favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&amp;display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -31,14 +31,108 @@
     </h1>
   </section>
 
+  <section class="introduction" aria-labelledby="introduction-title">
+    <p class="section-label">What Flowforest is</p>
+    <div class="introduction-copy">
+      <h2 id="introduction-title">Tools for people who want to work on their own terms.</h2>
+      <p>Flowforest studies how people actually work, then makes tools for the gaps it finds. We focus on the independent practitioner, the small operator, the household, and the person building a life outside the defaults of large platforms.</p>
+      <p>We start with research because the right design begins with the right question. The products are where that understanding becomes useful.</p>
+    </div>
+  </section>
+
+  <section class="products" aria-labelledby="products-title">
+    <header class="products-header">
+      <p class="section-label section-label-light">Our tools</p>
+      <h2 id="products-title">Three places to think, in your own words.</h2>
+    </header>
+
+    <article class="product product-flare">
+      <div class="product-copy">
+        <p class="product-number">01 / Capture</p>
+        <h3>Flare</h3>
+        <p class="product-lede">Capture a thought before it disappears.</p>
+        <p>Flare turns your voice into plain Markdown notes with live English transcription that runs entirely on your Android phone.</p>
+        <ul class="product-details" aria-label="Flare features">
+          <li>On-device transcription</li>
+          <li>No account, ads, analytics, or internet permission</li>
+          <li>Markdown files with tags and YAML front matter</li>
+        </ul>
+        <p class="product-status">Android · In development</p>
+      </div>
+      <div class="product-visual flare-visual" aria-hidden="true">
+        <div class="flare-phone">
+          <div class="flare-phone-top"><span>Flare</span><i></i></div>
+          <p class="flare-transcript">The tools should fade into the work, leaving the thought intact.</p>
+          <div class="flare-wave"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="flare-record"><span></span></div>
+          <small>Listening on device</small>
+        </div>
+      </div>
+    </article>
+
+    <article class="product product-runway">
+      <div class="product-copy">
+        <p class="product-number">02 / Connect</p>
+        <h3>Runway</h3>
+        <p class="product-lede">A knowledge workspace built around your files.</p>
+        <p>Runway helps ideas become connected knowledge while keeping Markdown on disk as the source of truth. Your notes remain readable, portable, and open to every tool you choose.</p>
+        <ul class="product-details" aria-label="Runway features">
+          <li>Local-first Markdown workspace</li>
+          <li>Links, backlinks, and structured relationships</li>
+          <li>External edits reconcile live</li>
+        </ul>
+        <p class="product-status">Desktop and web · In development</p>
+      </div>
+      <div class="product-visual runway-visual" aria-hidden="true">
+        <div class="runway-window">
+          <div class="runway-bar"><i></i><i></i><i></i><span>FIELD NOTES</span></div>
+          <div class="runway-body">
+            <div class="runway-sidebar"><b>Today</b><span>Research</span><span>Projects</span><span>Archive</span></div>
+            <div class="runway-note">
+              <small>SEPTEMBER 23</small>
+              <strong>Finding the signal</strong>
+              <p>Ideas become useful when their relationships are visible.</p>
+              <div class="runway-link">↗ Local-first systems</div>
+              <div class="runway-link">↗ Working independently</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="product product-slate">
+      <div class="product-copy">
+        <p class="product-number">03 / Reflect</p>
+        <h3>Slate</h3>
+        <p class="product-lede">A daily page made for the Pencil.</p>
+        <p>Slate is a pencil-first journal and planner for iPad and Mac. Its custom brush engine makes writing feel direct, while your pages remain yours to sync, export, and keep.</p>
+        <ul class="product-details" aria-label="Slate features">
+          <li>One focused page per day</li>
+          <li>Custom brushes and paper styles</li>
+          <li>Folder or iCloud sync, plus PDF export</li>
+        </ul>
+        <p class="product-status">iPad and Mac · In development</p>
+      </div>
+      <div class="product-visual slate-visual" aria-hidden="true">
+        <div class="slate-page">
+          <div class="slate-date"><small>WEDNESDAY</small><strong>23</strong><span>SEPTEMBER</span></div>
+          <p>Make room for<br><em>what matters.</em></p>
+          <svg viewBox="0 0 320 90" role="presentation"><path d="M8 65C42 18 66 78 103 48C139 19 157 70 191 42C216 21 236 34 250 51C266 69 286 60 313 22"/></svg>
+        </div>
+        <div class="slate-pencil"></div>
+      </div>
+    </article>
+  </section>
+
   <section class="beliefs">
+    <p class="section-label">Our principles</p>
     <h2 class="beliefs-heading">What we believe</h2>
     <ul class="beliefs-list">
       <li>
         <p>Individuals should own their data, their files, their knowledge. Not lease it.</p>
       </li>
       <li>
-        <p>Tools should serve one person well, not optimise for a market segment.</p>
+        <p>We make opinionated tools for individuals: clear in their purpose, coherent in their design, and shaped around the person using them.</p>
       </li>
       <li>
         <p>Knowledge infrastructure — storage, notes, workflow — should be portable and local-first wherever possible, not locked inside someone else's platform.</p>
@@ -47,11 +141,36 @@
         <p>Independence from large platforms is a feature, not a constraint to design around.</p>
       </li>
       <li>
-        <p>Self-reliance becomes realistic when the tools actually fit the person using them.</p>
+        <p>Tools should adapt to the person using them, not require the person to adapt to the tool.</p>
       </li>
       <li>
         <p>A good tool fades into the work. A bad tool inserts itself, asks for attention, collects telemetry, and reshapes the user around its business model.</p>
       </li>
+    </ul>
+  </section>
+
+  <section class="method" aria-labelledby="method-title">
+    <div class="method-copy">
+      <p class="section-label">How we work</p>
+      <h2 id="method-title">Begin with the person, not the product.</h2>
+      <p>We look at what someone is trying to do, where it breaks down, and what surrounds it. Research helps us understand the problem before we decide what to make. Design turns that understanding into tools suited to real life.</p>
+      <p>We keep returning to the research as the work develops, so the design stays accountable to the person it is meant to serve.</p>
+    </div>
+    <div class="name-note">
+      <div><span>Forest</span><p>The wider system around the work.</p></div>
+      <div><span>Flow</span><p>The experience we want to enable within it.</p></div>
+      <div><span>Forestry</span><p>The patience and care required to improve both over time.</p></div>
+    </div>
+  </section>
+
+  <section class="boundaries" aria-labelledby="boundaries-title">
+    <p class="section-label section-label-light">What we won't build</p>
+    <h2 id="boundaries-title">The business model should not work against the person.</h2>
+    <ul>
+      <li>Products that depend on surveillance or attention extraction.</li>
+      <li>Features that increase engagement at the expense of the person's actual work.</li>
+      <li>Systems that make people's data difficult to take elsewhere.</li>
+      <li>Tools that force people into a generic way of working.</li>
     </ul>
   </section>
 </main>
