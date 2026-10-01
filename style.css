@@ -476,3 +476,43 @@ a:focus-visible {
   outline: 2px solid var(--black);
   outline-offset: 3px;
 }
+
+/* ---------- Flare privacy policy ---------- */
+
+.privacy-policy {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 130px var(--edge) 64px;
+}
+
+.privacy-policy h1 {
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  margin: 0 0 16px;
+}
+
+.policy-updated {
+  color: var(--grey-700);
+  margin-bottom: 48px;
+}
+
+.privacy-policy h2 {
+  font-size: 1.25rem;
+  margin: 36px 0 12px;
+}
+
+.privacy-policy p {
+  line-height: 1.75;
+}
+
+.privacy-policy a,
+.product-policy-link {
+  color: inherit;
+  text-underline-offset: 0.2em;
+  overflow-wrap: anywhere;
+}
+
+.product-policy-link {
+  font-size: 0.85rem;
+}

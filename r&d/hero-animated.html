@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Flowforest hero — animated contours</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black: #0c0c0c;
+    --ink: #1a1c1e;
+    --grey-500: #787878;
+    --white: #ffffff;
+    --edge: clamp(24px, 6vw, 64px);
+    --edge-gutter: calc(var(--edge) + max(0px, (100vw - 1200px) / 2));
+    --panel: #141414;
+    --panel-line: #262626;
+    --panel-txt: #d8d8d8;
+    --panel-mut: #777;
+    --panel-accent: #e8e8e8;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: var(--white);
+    color: var(--ink);
+    font-family: "Libre Franklin", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  /* ---------- canvas ---------- */
+  #stage {
+    position: fixed;
+    inset: 0;
+    display: block;
+    z-index: 0;
+  }
+
+  /* ---------- hero overlay (mirrors flowforest/website/style.css) ---------- */
+  #hero {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: clamp(24px, 4vw, 48px);
+    min-height: 100svh;
+    padding: clamp(32px, 6vw, 64px) var(--edge-gutter);
+    background-image: linear-gradient(to left, var(--white) 0%, rgba(255, 255, 255, 0.96) 24%, rgba(255, 255, 255, 0) 68%);
+  }
+  #hero[hidden] { display: none; }
+
+  .site-header {
+    position: fixed;
+    inset: 0 0 auto;
+    padding: 1rem var(--edge-gutter);
+    background-color: rgba(255, 255, 255, 0.9);
+    backdrop-filter: blur(3px);
+  }
+  .brand { display: inline-flex; }
+  .brand-mark { height: 37px; width: auto; display: block; }
+
+  .hero-icon {
+    flex: 1 1 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+  }
+  .hero-mark { width: 100%; max-width: min(42vw, 420px); height: auto; display: block; }
+
+  .tagline {
+    flex: 1 1 50%;
+    margin: 0;
+    min-width: 0;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-size: clamp(1.75rem, 3.6vw, 3.25rem);
+    line-height: 1.12;
+    color: var(--black);
+  }
+  .tagline .line { display: block; }
+  .line-3 { color: var(--grey-500); font-weight: 400; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .line { opacity: 0; transform: translateY(0.4em); animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+    .line-1 { animation-delay: 0.05s; }
+    .line-2 { animation-delay: 0.22s; }
+    .line-3 { animation-delay: 0.39s; }
+    @keyframes rise { to { opacity: 1; transform: translateY(0); } }
+  }
+
+  @media (max-width: 768px) {
+    #hero { flex-direction: column; justify-content: center; }
+    .hero-icon, .tagline { flex: none; width: 100%; }
+    .tagline { font-size: clamp(2rem, 8vw, 2.75rem); }
+  }
+
+  /* ---------- control panel ---------- */
+  #panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    z-index: 3;
+    width: min(288px, 100vw);
+    height: 100vh;
+    overflow-y: auto;
+    padding: 18px 16px;
+    background: var(--panel);
+    border-left: 1px solid var(--panel-line);
+    color: var(--panel-txt);
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 12px;
+  }
+  #panel[hidden] { display: none; }
+
+  #panel h1 {
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--panel-mut);
+    margin: 0 0 4px;
+    font-weight: 600;
+  }
+  #panel .sub { color: var(--panel-mut); font-size: 9px; line-height: 1.5; margin: 0 0 16px; }
+  .grp { margin-bottom: 14px; }
+  .grp label {
+    display: flex;
+    justify-content: space-between;
+    color: var(--panel-mut);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 5px;
+    font-size: 10px;
+  }
+  .grp label .v { color: var(--panel-accent); }
+  input[type=range] { width: 100%; -webkit-appearance: none; appearance: none; height: 2px; background: var(--panel-line); outline: none; }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 12px; height: 12px; border-radius: 50%;
+    background: var(--panel-accent); cursor: pointer;
+  }
+  input[type=range]::-moz-range-thumb { width: 12px; height: 12px; border: 0; border-radius: 50%; background: var(--panel-accent); cursor: pointer; }
+  .row { display: flex; gap: 8px; }
+  .row > * { flex: 1; }
+  input[type=number] {
+    background: #000; border: 1px solid var(--panel-line); color: var(--panel-txt);
+    padding: 6px; font-family: inherit; font-size: 11px; width: 100%;
+  }
+  input[type=color] { width: 100%; height: 30px; padding: 2px; background: #000; border: 1px solid var(--panel-line); cursor: pointer; }
+  button {
+    background: #1d1d1d; border: 1px solid var(--panel-line); color: var(--panel-txt);
+    padding: 8px 6px; font-family: inherit; font-size: 10px; letter-spacing: 0.06em;
+    text-transform: uppercase; cursor: pointer;
+  }
+  button:hover { background: #2a2a2a; border-color: #3a3a3a; }
+  .sep { border: 0; border-top: 1px solid var(--panel-line); margin: 16px 0; }
+  .toggle {
+    display: flex; align-items: center; gap: 8px; cursor: pointer; color: var(--panel-mut);
+    text-transform: uppercase; letter-spacing: 0.06em; font-size: 10px;
+  }
+  .toggle input { accent-color: var(--panel-accent); }
+  .hint { color: var(--panel-mut); font-size: 9px; line-height: 1.45; margin: 6px 0 0; }
+  .ro { color: var(--panel-mut); font-size: 10px; letter-spacing: 0.04em; }
+  .ro b { color: var(--panel-accent); font-weight: 500; }
+
+  #ui-toggle {
+    position: fixed;
+    top: 12px;
+    right: 12px;
+    z-index: 4;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    background: rgba(20, 20, 20, 0.9);
+    border: 1px solid var(--panel-line);
+    color: var(--panel-accent);
+    font-size: 13px;
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stage" aria-hidden="true"></canvas>
+
+<div id="hero">
+  <header class="site-header">
+    <span class="brand"><img src="../logo.png" alt="Flowforest" class="brand-mark"></span>
+  </header>
+  <div class="hero-icon">
+    <img src="../entropy.svg" alt="" class="hero-mark">
+  </div>
+  <h1 class="tagline">
+    <span class="line line-1">Reduce the noise.</span>
+    <span class="line line-2">Amplify the signal.</span>
+    <span class="line line-3">Hand the tools back to the individual.</span>
+  </h1>
+</div>
+
+<button id="ui-toggle" type="button" title="Toggle controls (H)">⌥</button>
+
+<aside id="panel">
+  <h1>Animated Contours</h1>
+  <p class="sub">Hero prototype. Move the pointer across the artwork — the contour field warps around it and the wake keeps rippling.</p>
+
+  <div class="grp">
+    <label>Seed <span class="v" id="seed-v">7</span></label>
+    <div class="row">
+      <input type="number" id="seed-in" value="7">
+      <button id="seed-rnd" type="button">Rnd</button>
+    </div>
+  </div>
+
+  <hr class="sep">
+
+  <div class="grp"><label>Animation speed <span class="v" id="speed-v">0.35</span></label>
+    <input type="range" id="speed" min="0" max="2" step="0.05" value="0.35"></div>
+  <div class="row" style="margin-bottom:14px">
+    <button id="pause-btn" type="button">Pause</button>
+    <button id="reset-btn" type="button">Reset</button>
+  </div>
+
+  <hr class="sep">
+
+  <div class="grp"><label>Warp strength <span class="v" id="strength-v">130</span></label>
+    <input type="range" id="strength" min="0" max="220" step="2" value="130"></div>
+  <div class="grp"><label>Warp radius <span class="v" id="radius-v">150</span></label>
+    <input type="range" id="radius" min="40" max="420" step="5" value="150"></div>
+  <div class="grp"><label>Swirl <span class="v" id="swirl-v">0.45</span></label>
+    <input type="range" id="swirl" min="-1.2" max="1.2" step="0.05" value="0.45"></div>
+  <div class="grp"><label>Wake <span class="v" id="ripple-v">0.90</span></label>
+    <input type="range" id="ripple" min="0" max="2" step="0.05" value="0.9"></div>
+
+  <hr class="sep">
+
+  <div class="grp"><label>Curves <span class="v" id="curves-v">3</span></label>
+    <input type="range" id="curves" min="1" max="12" step="1" value="3"></div>
+  <div class="grp"><label>Frequency <span class="v" id="freq-v">2.0</span></label>
+    <input type="range" id="freq" min="0.3" max="6" step="0.1" value="2"></div>
+  <div class="grp"><label>Amplitude <span class="v" id="amp-v">110</span></label>
+    <input type="range" id="amp" min="0" max="220" step="2" value="110"></div>
+  <div class="grp"><label>Phase drift <span class="v" id="drift-v">0.60</span></label>
+    <input type="range" id="drift" min="0" max="3.14" step="0.05" value="0.6"></div>
+  <div class="grp"><label>Orientation <span class="v" id="angle-v">90°</span></label>
+    <input type="range" id="angle" min="-90" max="90" step="1" value="90"></div>
+
+  <hr class="sep">
+
+  <div class="grp"><label>Falloff σ <span class="v" id="sigma-v">34</span></label>
+    <input type="range" id="sigma" min="4" max="160" step="1" value="34"></div>
+  <div class="grp"><label>Density <span class="v" id="dens-v">70000</span></label>
+    <input type="range" id="dens" min="3000" max="120000" step="1000" value="70000"></div>
+  <div class="grp"><label>Dot size <span class="v" id="dot-v">1.6</span></label>
+    <input type="range" id="dot" min="0.5" max="4" step="0.1" value="1.6"></div>
+  <div class="grp"><label>Edge sharpness <span class="v" id="gam-v">1.4</span></label>
+    <input type="range" id="gam" min="0.3" max="4" step="0.1" value="1.4"></div>
+
+  <hr class="sep">
+
+  <div class="row">
+    <div class="grp"><label>Background</label><input type="color" id="bg-color" value="#ffffff"></div>
+    <div class="grp"><label>Stipple</label><input type="color" id="dot-color" value="#141414"></div>
+    <div class="grp"><label>Contours</label><input type="color" id="line-color" value="#0c0c0c"></div>
+  </div>
+
+  <hr class="sep">
+
+  <div class="grp"><label class="toggle"><input type="checkbox" id="oneside" checked> One-sided band</label></div>
+  <div class="grp"><label class="toggle"><input type="checkbox" id="stroke" checked> Draw contour line</label></div>
+  <div class="grp"><label class="toggle"><input type="checkbox" id="instr"> Instrument readout</label></div>
+  <div class="grp"><label class="toggle"><input type="checkbox" id="hero-view" checked> Hero overlay</label></div>
+
+  <hr class="sep">
+  <p class="ro">fps <b id="ro-fps">–</b> · dots <b id="ro-dots">–</b> · samples <b id="ro-samples">–</b><span id="ro-cap"></span></p>
+  <p class="hint">H — hide panel · Space — pause. Not wired into index.html; hero.png stays as-is.</p>
+</aside>
+
+<script>
+/* ------------------------------------------------------------------ *
+ * Animated variant of goodjobjohn/public/r&d/stipple_contours_1.html.
+ * Same curve field and stipple sampling; three additions:
+ *   1. every curve advances its phase on its own clock (living field)
+ *   2. a smooth displacement field warps curves *and* stipple around the
+ *      pointer, so dots stay welded to their contour
+ *   3. pointer motion spawns a decaying wake wave
+ * ------------------------------------------------------------------ */
+const TAU = Math.PI * 2;
+const REF = 900;             // reference size, matches the generator
+const MAX_SAMPLES = 180000;  // hard ceiling on stipple samples per rebuild
+const BUCKETS = 4;           // dot radius buckets -> 4 fill() calls per frame
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const P = {
+  seed: 7, curves: 3, freq: 2.0, amp: 110, drift: 0.6, angle: 90,
+  sigma: 34, dens: 70000, dot: 1.6, gam: 1.4,
+  bg: '#ffffff', dotColor: '#141414', lineColor: '#0c0c0c',
+  oneside: true, stroke: true, instr: false, hero: true,
+  speed: 0.35, strength: 130, radius: 150, swirl: 0.45, ripple: 0.9
+};
+
+const canvas = document.getElementById('stage');
+const ctx = canvas.getContext('2d', { alpha: false });
+
+const view = { W: 0, H: 0, unit: 1, fieldW: 0, fieldH: 0, cosA: 1, sinA: 0, w2: 0, h2: 0, fw2: 0, fh2: 0 };
+let lines = [];       // curve definitions
+let groups = [];      // stipple dots, grouped by owning curve
+let dotRInv = 1;      // 1 / max dot radius, for bucket indexing
+let buf = [], counts = new Int32Array(BUCKETS);
+let T = 0;            // animation clock (seconds, scaled by P.speed)
+let tw = 0;           // wall clock (seconds, always runs)
+let paused = reduceMotion;
+let lastTs = 0;
+let fpsEma = 60, statsAt = 0;
+
+const pointer = { active: false, fx: 0, fy: 0, sx: 0, sy: 0, lastFx: 0, lastFy: 0, lastT: 0, tRipple: -99, rippleAmp: 0 };
+const disp = { x: 0, y: 0, f: 0 };
+
+/* -------------- deterministic PRNG (mulberry32), p5.random-shaped ------------- */
+let rngState = 1;
+function randomSeed(s) { rngState = (s | 0) || 1; }
+function random(a, b) {
+  // mulberry32 — deterministic, same call pattern as the generator
+  rngState = (rngState + 0x6d2b79f5) | 0;
+  let t = rngState;
+  t = Math.imul(t ^ (t >>> 15), t | 1);
+  t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+  const v = ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  if (a === undefined) return v;
+  if (b === undefined) return v * a;
+  return a + v * (b - a);
+}
+
+/* ---------------------------- field geometry ------------------------------- */
+function updateField() {
+  const th = (P.angle * Math.PI) / 180;
+  view.cosA = Math.cos(th);
+  view.sinA = Math.sin(th);
+  view.fieldW = Math.abs(view.W * view.cosA) + Math.abs(view.H * view.sinA);
+  view.fieldH = Math.abs(view.W * view.sinA) + Math.abs(view.H * view.cosA);
+  view.w2 = view.W / 2; view.h2 = view.H / 2;
+  view.fw2 = view.fieldW / 2; view.fh2 = view.fieldH / 2;
+}
+const toFieldX = (px, py) => (px - view.w2) * view.cosA + (py - view.h2) * view.sinA + view.fw2;
+const toFieldY = (px, py) => -(px - view.w2) * view.sinA + (py - view.h2) * view.cosA + view.fh2;
+const toCanvasX = (fx, fy) => (fx - view.fw2) * view.cosA - (fy - view.fh2) * view.sinA + view.w2;
+const toCanvasY = (fx, fy) => (fx - view.fw2) * view.sinA + (fy - view.fh2) * view.cosA + view.h2;
+
+/* ------------------------------- curves ----------------------------------- */
+// x(y) = baseX + amp * sin(freq * t + phase + drift * t), t = y / fieldH * TAU
+// Animation adds a per-curve phase term `rate * T`, so each contour drifts on
+// its own clock. Amplitude breathes slightly so the field never looks frozen.
+function buildLines() {
+  randomSeed(P.seed);
+  lines = [];
+  const unit = view.unit;
+  const margin = 120 * unit, span = view.fieldW - margin * 1.2;
+  for (let i = 0; i < P.curves; i++) {
+    lines.push({
+      baseX: margin + (span * (i + 0.5)) / P.curves + random(-30, 30) * unit,
+      amp: P.amp * unit * (0.7 + random() * 0.6),
+      freq: P.freq * (0.85 + random() * 0.3),
+      phase: random(TAU),
+      drift: random(-P.drift, P.drift),
+      side: P.oneside ? (random() < 0.5 ? -1 : 1) : 0,
+      rate: (0.45 + random() * 0.9) * (random() < 0.5 ? -1 : 1),
+      bPhase: random(TAU),
+      bRate: 0.12 + random() * 0.18
+    });
+  }
+}
+const curveX = (L, y, t) =>
+  L.baseX + L.amp * (1 + 0.06 * Math.sin(t * L.bRate + L.bPhase)) *
+  Math.sin(((L.freq + L.drift) * TAU / view.fieldH) * y + L.phase + L.rate * t);
+const curveSlope = (L, y) =>
+  L.amp * Math.cos(((L.freq + L.drift) * TAU / view.fieldH) * y + L.phase) *
+  (L.freq + L.drift) * (TAU / view.fieldH);
+
+let statsDots = 0, statsSamples = 0, statsCapped = false;
+
+/* ------------------------------- stipple ---------------------------------- */
+function buildDots() {
+  const { W, H, unit, fieldW, fieldH } = view;
+  const wanted = Math.round(P.dens * (W * H) / (REF * REF));
+  const samples = Math.min(MAX_SAMPLES, wanted);
+  statsCapped = wanted > MAX_SAMPLES;
+
+  randomSeed(P.seed);
+  const acc = lines.map(() => []);
+  for (let n = 0; n < samples; n++) {
+    const px = random(W), py = random(H);
+    const fx = toFieldX(px, py), fy = toFieldY(px, py);
+    let best = 1e9, bestSigned = 0, bestIdx = -1, bestSide = 0;
+    for (let i = 0; i < lines.length; i++) {
+      const L = lines[i];
+      const dxh = fx - curveX(L, fy, 0);
+      const m = curveSlope(L, fy);
+      const perp = Math.abs(dxh) / Math.sqrt(1 + m * m);
+      if (perp < best) { best = perp; bestSigned = dxh; bestIdx = i; bestSide = L.side; }
+    }
+    if (bestSide !== 0 && bestSigned * bestSide <= 0) continue;   // one-sided rejection
+    let prob = Math.exp(-best / (P.sigma * unit));
+    prob = Math.pow(prob, P.gam);
+    if (random() < prob) {
+      const cx0 = curveX(lines[bestIdx], fy, 0);
+      acc[bestIdx].push(fx - cx0, fy, P.dot * unit * (0.6 + random() * 0.8));
+    }
+  }
+
+  groups = [];
+  let total = 0;
+  for (let i = 0; i < lines.length; i++) {
+    const a = acc[i], n = a.length / 3;
+    if (!n) { groups.push(null); continue; }
+    const off = new Float32Array(n), fy = new Float32Array(n), size = new Float32Array(n);
+    for (let k = 0; k < n; k++) { off[k] = a[k * 3]; fy[k] = a[k * 3 + 1]; size[k] = a[k * 3 + 2]; }
+    groups.push({ off, fy, size, n });
+    total += n;
+  }
+
+  // radius buckets: base radius is 0.5 * size, boosted up to 1.7x near the pointer
+  dotRInv = 1 / Math.max(0.35, P.dot * unit * 1.4 * 0.5 * 1.7);
+  for (let b = 0; b < BUCKETS; b++) buf[b] = new Float32Array(Math.max(1, total) * 3);
+
+  statsDots = total;
+  statsSamples = samples;
+}
+
+/* ---------------------------- warp field ---------------------------------- */
+// Smooth displacement around the pointer, expressed in field space so curves
+// (functions of y) and stipple both deform through the same function.
+function fieldDisp(fx, fy) {
+  disp.x = 0; disp.y = 0; disp.f = 0;
+  if (!pointer.active) return disp;
+
+  const R = P.radius;
+  const dx = fx - pointer.sx, dy = fy - pointer.sy;
+  const d2 = dx * dx + dy * dy;
+
+  let age = 0, ripple = 0, reach = R * 3;
+  if (pointer.rippleAmp > 0.5) {
+    age = tw - pointer.tRipple;
+    ripple = pointer.rippleAmp * Math.exp(-age * 1.6);
+    if (ripple > 0.5) reach = Math.max(reach, age * 620 + R * 1.4);
+    else ripple = 0;
+  }
+  if (d2 > reach * reach) return disp;
+
+  const d = Math.sqrt(d2) + 1e-6;
+  const f = Math.exp(-d2 / (R * R));
+  disp.f = f;
+
+  const ux = dx / d, uy = dy / d;
+  const c = Math.cos(P.swirl), s = Math.sin(P.swirl);
+  const wx = ux * c - uy * s, wy = ux * s + uy * c;   // swirled push direction
+
+  const mag = P.strength * f;
+  disp.x = mag * wx;
+  disp.y = mag * wy * 0.75;
+
+  if (ripple > 0) {
+    const band = Math.abs(d - age * 620);
+    const w = R * 0.4;
+    if (band < w * 3) {
+      const rf = Math.exp(-(band * band) / (2 * w * w)) * ripple;
+      disp.x += rf * wx;
+      disp.y += rf * wy * 0.75;
+    }
+  }
+  return disp;
+}
+
+/* ------------------------------- render ----------------------------------- */
+function render() {
+  const { W, H, cosA, sinA, fw2, fh2, w2, h2 } = view;
+
+  ctx.fillStyle = P.bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // --- stipple, displaced by its own curve's motion + the warp field ---
+  counts.fill(0);
+  for (let li = 0; li < lines.length; li++) {
+    const g = groups[li];
+    if (!g) continue;
+    const L = lines[li];
+    const offA = g.off, fyA = g.fy, szA = g.size, n = g.n;
+    const k = ((L.freq + L.drift) * TAU) / view.fieldH;
+    const amp = L.amp * (1 + 0.06 * Math.sin(T * L.bRate + L.bPhase));
+    const ph = L.phase + L.rate * T;
+    const baseX = L.baseX;
+
+    for (let i = 0; i < n; i++) {
+      const fy = fyA[i];
+      const cx = baseX + amp * Math.sin(k * fy + ph) + offA[i];
+      const d = fieldDisp(cx, fy);
+      const fx2 = cx + d.x, fy2 = fy + d.y;
+      const px = (fx2 - fw2) * cosA - (fy2 - fh2) * sinA + w2;
+      if (px < -2 || px > W + 2) continue;
+      const py = (fx2 - fw2) * sinA + (fy2 - fh2) * cosA + h2;
+      if (py < -2 || py > H + 2) continue;
+
+      const r = szA[i] * 0.5 * (1 + 0.7 * d.f);
+      let b = (r * dotRInv * BUCKETS) | 0;
+      if (b < 0) b = 0; else if (b >= BUCKETS) b = BUCKETS - 1;
+      const arr = buf[b], c = counts[b] * 3;
+      arr[c] = px; arr[c + 1] = py; arr[c + 2] = r;
+      counts[b]++;
+    }
+  }
+
+  ctx.fillStyle = P.dotColor;
+  for (let b = 0; b < BUCKETS; b++) {
+    const arr = buf[b], cnt = counts[b];
+    if (!cnt) continue;
+    ctx.beginPath();
+    for (let i = 0; i < cnt; i++) {
+      const c = i * 3, x = arr[c], y = arr[c + 1], r = arr[c + 2];
+      ctx.moveTo(x + r, y);
+      ctx.arc(x, y, r, 0, TAU);
+    }
+    ctx.fill();
+  }
+
+  // --- contour strokes, sampled through the same warp field ---
+  if (P.stroke) {
+    ctx.strokeStyle = P.lineColor;
+    ctx.lineWidth = Math.max(0.6, 1.1 * view.unit);
+    ctx.lineJoin = 'round';
+    const y0 = -4 * view.unit, y1 = view.fieldH + 4 * view.unit;
+    const steps = Math.ceil((y1 - y0) / 2);
+    for (const L of lines) {
+      ctx.beginPath();
+      for (let i = 0; i <= steps; i++) {
+        const y = y0 + (i * (y1 - y0)) / steps;
+        const cx = curveX(L, y, T);
+        const d = fieldDisp(cx, y);
+        const px = toCanvasX(cx + d.x, y + d.y);
+        const py = toCanvasY(cx + d.x, y + d.y);
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+    }
+  }
+
+  if (P.instr) drawInstrument();
+}
+
+function drawInstrument() {
+  const unit = view.unit;
+  ctx.save();
+  ctx.strokeStyle = '#969696';
+  ctx.fillStyle = '#969696';
+  ctx.lineWidth = Math.max(0.5, unit);
+  ctx.font = `${Math.round(9 * unit)}px ui-monospace, monospace`;
+  const ax = 46 * unit;
+  ctx.beginPath();
+  ctx.moveTo(ax, 40 * unit); ctx.lineTo(ax, view.H - 40 * unit);
+  for (let y = 60 * unit; y < view.H - 40 * unit; y += 18 * unit) {
+    const major = Math.round((y - 60 * unit) / (18 * unit)) % 4 === 0;
+    ctx.moveTo(ax, y); ctx.lineTo(ax + (major ? 9 : 4) * unit, y);
+  }
+  ctx.stroke();
+  ctx.save();
+  ctx.translate(ax - 14 * unit, view.H * 0.42); ctx.rotate(-Math.PI / 2);
+  ctx.fillText('RADICALLY SCALED PARAMETERS', 0, 0);
+  ctx.restore();
+  ctx.save();
+  ctx.translate(ax - 14 * unit, view.H * 0.66); ctx.rotate(-Math.PI / 2);
+  ctx.fillText('CENTER', 0, 0);
+  ctx.restore();
+  randomSeed(P.seed + 777);
+  for (let i = 0; i < Math.min(3, lines.length); i++) {
+    const fy = view.fieldH * (0.25 + 0.22 * i);
+    const cx = curveX(lines[i], fy, T);
+    const px = toCanvasX(cx, fy), py = toCanvasY(cx, fy);
+    ctx.beginPath();
+    ctx.moveTo(px - 26 * unit, py); ctx.lineTo(px - 14 * unit, py); ctx.stroke();
+    ctx.fillText(`${random(0.1, 0.9).toFixed(4)}A`, px + 6 * unit, py + 3 * unit);
+  }
+  ctx.restore();
+}
+
+/* -------------------------------- loop ------------------------------------ */
+function tick(ts) {
+  const dt = lastTs ? Math.min(0.05, (ts - lastTs) / 1000) : 1 / 60;
+  lastTs = ts;
+  if (!paused) T += dt * P.speed;
+  tw += dt;
+
+  // pointer easing: the warp lags the cursor slightly, which reads as liquid
+  const k = 1 - Math.exp(-dt * 14);
+  pointer.sx += (pointer.fx - pointer.sx) * k;
+  pointer.sy += (pointer.fy - pointer.sy) * k;
+
+  fpsEma += ((1 / dt) - fpsEma) * 0.08;
+
+  render();
+
+  if (ts - statsAt > 400) {
+    statsAt = ts;
+    roFps.textContent = fpsEma.toFixed(0);
+    roDots.textContent = statsDots.toLocaleString();
+    roSamples.textContent = statsSamples.toLocaleString();
+    roCap.textContent = statsCapped ? ' (capped)' : '';
+  }
+  requestAnimationFrame(tick);
+}
+
+/* ------------------------------- build all -------------------------------- */
+function regen() {
+  updateField();
+  buildLines();
+  buildDots();
+}
+function resize() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.25);
+  view.W = window.innerWidth;
+  view.H = window.innerHeight;
+  // hero.png is 16:9 and shown with background-size: cover — match that scale
+  view.unit = Math.max(view.W / (REF * 16 / 9), view.H / REF);
+  if (panelAutoHidden && view.W >= 720) { panel.hidden = false; panelAutoHidden = false; }
+  canvas.width = Math.round(view.W * dpr);
+  canvas.height = Math.round(view.H * dpr);
+  canvas.style.width = view.W + 'px';
+  canvas.style.height = view.H + 'px';
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  regen();
+}
+let resizeTimer = 0;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(resize, 150);
+});
+
+/* ------------------------------- pointer ---------------------------------- */
+function onMove(e) {
+  const fx = toFieldX(e.clientX, e.clientY);
+  const fy = toFieldY(e.clientX, e.clientY);
+  const now = performance.now() / 1000;
+  if (!pointer.active) {
+    pointer.active = true;
+    pointer.sx = fx; pointer.sy = fy;
+    pointer.lastFx = fx; pointer.lastFy = fy; pointer.lastT = now;
+  }
+  pointer.fx = fx; pointer.fy = fy;
+
+  const dt = Math.max(1 / 240, now - pointer.lastT);
+  const v = Math.hypot(fx - pointer.lastFx, fy - pointer.lastFy) / dt;   // field px/s
+  pointer.lastFx = fx; pointer.lastFy = fy; pointer.lastT = now;
+
+  const norm = Math.min(1, v / 1600);
+  if (norm > 0.04) {
+    pointer.tRipple = tw;
+    pointer.rippleAmp = P.strength * P.ripple * norm;
+  }
+}
+window.addEventListener('pointermove', onMove, { passive: true });
+window.addEventListener('blur', () => { pointer.active = false; });
+document.addEventListener('mouseleave', () => { pointer.active = false; });
+
+/* -------------------------------- UI -------------------------------------- */
+const el = (id) => document.getElementById(id);
+const roFps = el('ro-fps'), roDots = el('ro-dots'), roSamples = el('ro-samples'), roCap = el('ro-cap');
+const heroOverlay = el('hero'), panel = el('panel');
+
+function readUI() {
+  P.seed = parseInt(el('seed-in').value, 10) || 1;
+  P.speed = +el('speed').value;
+  P.strength = +el('strength').value;
+  P.radius = +el('radius').value;
+  P.swirl = +el('swirl').value;
+  P.ripple = +el('ripple').value;
+  P.curves = +el('curves').value;
+  P.freq = +el('freq').value;
+  P.amp = +el('amp').value;
+  P.drift = +el('drift').value;
+  P.angle = +el('angle').value;
+  P.sigma = +el('sigma').value;
+  P.dens = +el('dens').value;
+  P.dot = +el('dot').value;
+  P.gam = +el('gam').value;
+  P.bg = el('bg-color').value;
+  P.dotColor = el('dot-color').value;
+  P.lineColor = el('line-color').value;
+  P.oneside = el('oneside').checked;
+  P.stroke = el('stroke').checked;
+  P.instr = el('instr').checked;
+  P.hero = el('hero-view').checked;
+  heroOverlay.hidden = !P.hero;
+  el('seed-v').textContent = P.seed;
+}
+
+// [id, readout-id, format, needsRebuild]
+const sliders = [
+  ['speed', 'speed-v', (v) => (+v).toFixed(2), false],
+  ['strength', 'strength-v', (v) => v, false],
+  ['radius', 'radius-v', (v) => v, false],
+  ['swirl', 'swirl-v', (v) => (+v).toFixed(2), false],
+  ['ripple', 'ripple-v', (v) => (+v).toFixed(2), false],
+  ['curves', 'curves-v', (v) => v, true],
+  ['freq', 'freq-v', (v) => (+v).toFixed(1), true],
+  ['amp', 'amp-v', (v) => v, true],
+  ['drift', 'drift-v', (v) => (+v).toFixed(2), true],
+  ['angle', 'angle-v', (v) => `${v}°`, true],
+  ['sigma', 'sigma-v', (v) => v, true],
+  ['dens', 'dens-v', (v) => v, true],
+  ['dot', 'dot-v', (v) => (+v).toFixed(1), true],
+  ['gam', 'gam-v', (v) => (+v).toFixed(1), true]
+];
+for (const [id, vid, fmt, rebuild] of sliders) {
+  const input = el(id);
+  input.addEventListener('input', () => {
+    el(vid).textContent = fmt(input.value);
+    readUI();
+    if (rebuild) regen();
+  });
+}
+for (const id of ['bg-color', 'dot-color', 'line-color']) {
+  el(id).addEventListener('input', readUI);
+}
+for (const id of ['stroke', 'instr', 'hero-view']) {
+  el(id).addEventListener('change', readUI);
+}
+el('oneside').addEventListener('change', () => { readUI(); regen(); });
+el('seed-in').addEventListener('change', () => { readUI(); regen(); });
+el('seed-rnd').addEventListener('click', () => {
+  el('seed-in').value = Math.floor(Math.random() * 99999);
+  readUI(); regen();
+});
+
+const pauseBtn = el('pause-btn');
+function syncPause() { pauseBtn.textContent = paused ? 'Play' : 'Pause'; }
+pauseBtn.addEventListener('click', () => { paused = !paused; syncPause(); });
+
+const DEFAULTS = {
+  'seed-in': 7, speed: 0.35, strength: 130, radius: 150, swirl: 0.45, ripple: 0.9,
+  curves: 3, freq: 2, amp: 110, drift: 0.6, angle: 90, sigma: 34, dens: 70000,
+  dot: 1.6, gam: 1.4, 'bg-color': '#ffffff', 'dot-color': '#141414', 'line-color': '#0c0c0c'
+};
+el('reset-btn').addEventListener('click', () => {
+  for (const id in DEFAULTS) {
+    const input = el(id);
+    input.value = DEFAULTS[id];
+    if (input.type === 'range') input.dispatchEvent(new Event('input'));
+  }
+  el('oneside').checked = true;
+  el('stroke').checked = true;
+  el('instr').checked = false;
+  el('hero-view').checked = true;
+  readUI();
+  regen();
+});
+
+el('ui-toggle').addEventListener('click', () => { panel.hidden = !panel.hidden; });
+window.addEventListener('keydown', (e) => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'h' || e.key === 'H') panel.hidden = !panel.hidden;
+  if (e.key === ' ') { e.preventDefault(); paused = !paused; syncPause(); }
+});
+
+/* --------------------------------- go ------------------------------------- */
+readUI();
+let panelAutoHidden = false;
+if (window.innerWidth < 720) { panel.hidden = true; panelAutoHidden = true; }   // keep the artwork visible on phones
+syncPause();
+resize();
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

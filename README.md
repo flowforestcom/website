@@ -8,6 +8,10 @@ Static marketing site for [Flowforest](https://flowforest.com) — local-first t
 - `style.css` — styles
 - `logo.svg`, `favicon.png`, `hero.png` — branding and hero artwork
 - `_headers` — security headers (Cloudflare Pages)
+- `r&d/hero-animated.html` — hero prototype: live canvas version of `hero.png`
+  (generated from `goodjobjohn/public/r&d/stipple_contours_1.html`) with animated
+  contours and pointer-hover warp. Standalone, not linked from `index.html`, and
+  marked `noindex`. Served at `/r&d/hero-animated.html` when previewing locally.
 
 ## Local preview
 
