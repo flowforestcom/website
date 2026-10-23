@@ -31,7 +31,7 @@
     gam: 1.0,
     bg: '#ffffff',
     dotColor: '#141414',
-    lineColor: '#0c0c0c',
+    lineColor: '#737373',
     oneside: true,
     stroke: true,
     instr: false,
@@ -265,7 +265,7 @@
 
     if (P.stroke) {
       ctx.strokeStyle = P.lineColor;
-      ctx.lineWidth = Math.max(0.6, 1.1 * view.unit);
+      ctx.lineWidth = 0.5;
       ctx.lineJoin = 'round';
       const y0 = -4 * view.unit, y1 = view.fieldH + 4 * view.unit;
       const steps = Math.ceil((y1 - y0) / 2);

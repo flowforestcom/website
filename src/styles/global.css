@@ -45,14 +45,15 @@ body {
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .line {
+  .line,
+  .hero-sub {
     opacity: 0;
     transform: translateY(0.4em);
     animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
   .line-1 { animation-delay: 0.05s; }
   .line-2 { animation-delay: 0.22s; }
-  .line-3 { animation-delay: 0.39s; }
+  .hero-sub { animation-delay: 0.39s; }
 
   @keyframes rise {
     to { opacity: 1; transform: translateY(0); }
@@ -88,9 +89,9 @@ body {
   isolation: isolate;
   overflow: hidden;
   display: flex;
-  flex-direction: row-reverse;
-  align-items: center;
-  gap: clamp(24px, 4vw, 48px);
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(16px, 2.4vw, 28px);
   min-height: 100svh;
   padding: clamp(32px, 6vw, 64px) calc(var(--edge) + max(0px, (100vw - 1200px) / 2));
   width: 100vw;
@@ -98,8 +99,8 @@ body {
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
   background-color: var(--white);
-  /* the contour artwork is strongest on the right, behind the mark, so the
-     scrim fades in from the left to keep the tagline readable */
+  /* the contour artwork is strongest on the right, so the scrim fades in from
+     the left to keep the display type readable over it */
   background-image: linear-gradient(to right, var(--white) 0%, rgba(255, 255, 255, 0.94) 34%, rgba(255, 255, 255, 0) 72%);
   background-position: center;
   background-size: cover;
@@ -123,7 +124,6 @@ body {
 }
 
 .hero-icon {
-  flex: 1 1 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -131,31 +131,65 @@ body {
   min-height: 0;
 }
 
+/* the mark sits in its own band, after the hero */
+.hero-mark-band {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(40px, 6vw, 72px) var(--edge) clamp(16px, 2.5vw, 32px);
+  background-color: var(--white);
+}
+
 .hero-mark {
   width: 100%;
-  max-width: min(42vw, 420px);
+  max-width: min(58vw, 620px);
   height: auto;
   display: block;
 }
 
 .tagline {
-  flex: 1 1 50%;
   margin: 0;
   min-width: 0;
   font-weight: 600;
-  letter-spacing: -0.02em;
-  font-size: clamp(1.75rem, 3.6vw, 3.25rem);
-  line-height: 1.12;
+  letter-spacing: -0.035em;
+  line-height: 1.04;
   color: var(--black);
 }
 
+/* Two display lines at different weights of scale: line 1 sits above line 2
+   like a kicker. Both must stay on a single row at every size, so each is
+   sized from the viewport width with no floor that could overflow, then capped
+   in rem so they stop growing on a large screen. line-2 is about 2.6x line-1,
+   matching the design. The vw divisors are the widths the strings need: 19
+   characters at this weight for line-2, 16 for line-1. */
 .tagline .line {
   display: block;
+  white-space: nowrap;
 }
 
-.line-3 {
-  color: var(--grey-500);
+.line-1 {
+  font-size: min(2.6rem, 5.4vw);
+  letter-spacing: -0.028em;
+  line-height: 1.1;
+}
+
+.line-2 {
+  font-size: min(7rem, 9.2vw);
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+/* subheading under the display type */
+.hero-sub {
+  margin: 0;
   font-weight: 400;
+  letter-spacing: -0.01em;
+  font-size: clamp(0.95rem, 1.35vw, 1.25rem);
+  line-height: 1.4;
+  color: var(--grey-500);
 }
 
 /* ---------- Beliefs ---------- */
@@ -446,29 +480,26 @@ body {
   .hero {
     flex-direction: column;
     justify-content: center;
-    min-height: auto;
+    min-height: 88svh;
     padding-top: clamp(48px, 10vw, 80px);
     padding-bottom: clamp(48px, 10vw, 80px);
     /* stacked layout: the copy sits mid-hero, so fade top-to-bottom instead */
     background-image: linear-gradient(to bottom, var(--white) 0%, rgba(255, 255, 255, 0.92) 40%, rgba(255, 255, 255, 0) 88%);
   }
 
-  .hero-icon,
-  .tagline {
-    flex: none;
-    width: 100%;
-  }
-
   .hero-mark {
-    max-width: min(72vw, 320px);
-    left: 63%;
-        position: relative;
+    max-width: min(78vw, 340px);
   }
 
-  .tagline {
-    font-size: clamp(2rem, 8vw, 2.75rem);
-  }
+  /* both display lines must stay on one row here; the vw terms in the base
+     rules already widen them on a narrow screen */
 
+  /* the subheading is small and sits over the contour field here, so give it
+     more contrast than the desktop grey */
+  .hero-sub {
+    color: var(--grey-700);
+    font-weight: 500;
+  }
 }
 
 @media (max-width: 480px) {
