@@ -98,12 +98,23 @@ body {
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
   background-color: var(--white);
-  background-image:
-    linear-gradient(to left, var(--white) 0%, rgba(255, 255, 255, 0.96) 24%, rgba(255, 255, 255, 0) 68%),
-    url("hero.png");
-  background-position: center, center;
-  background-size: cover, cover;
-  background-repeat: no-repeat, no-repeat;
+  /* the contour artwork is strongest on the right, behind the mark, so the
+     scrim fades in from the left to keep the tagline readable */
+  background-image: linear-gradient(to right, var(--white) 0%, rgba(255, 255, 255, 0.94) 34%, rgba(255, 255, 255, 0) 72%);
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+/* animated contour field, painted by hero-contours.js */
+/* absolute keeps it out of the hero's flex row; the .hero > * rule below
+   would otherwise make it a flex item and push the copy off screen. */
+.hero > .hero-contours {
+  position: absolute;
+  inset: 0;
+  display: block;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .hero > * {
@@ -438,6 +449,8 @@ body {
     min-height: auto;
     padding-top: clamp(48px, 10vw, 80px);
     padding-bottom: clamp(48px, 10vw, 80px);
+    /* stacked layout: the copy sits mid-hero, so fade top-to-bottom instead */
+    background-image: linear-gradient(to bottom, var(--white) 0%, rgba(255, 255, 255, 0.92) 40%, rgba(255, 255, 255, 0) 88%);
   }
 
   .hero-icon,
