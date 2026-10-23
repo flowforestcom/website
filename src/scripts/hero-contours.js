@@ -6,8 +6,8 @@
  * prototype control panel; there is no panel here, so they are fixed
  * constants. The pointer warps the field and leaves a decaying wake.
  *
- * Hero overlay text, header, and layout stay in index.html; this script
- * only paints the background canvas.
+ * Hero overlay text, header, and layout live in the Astro layout and page;
+ * this script only paints the background canvas.
  * ------------------------------------------------------------------ */
 (function () {
   'use strict';
@@ -68,7 +68,6 @@
   let paused = reduceMotion;
   let lastTs = 0;
   let running = false;
-  let needsRebuild = false;
 
   const pointer = { active: false, fx: 0, fy: 0, sx: 0, sy: 0, lastFx: 0, lastFy: 0, lastT: 0, tRipple: -99, rippleAmp: 0 };
   const disp = { x: 0, y: 0, f: 0 };
@@ -340,7 +339,7 @@
   let resizeTimer = 0;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => { needsRebuild = true; resize(); }, 150);
+    resizeTimer = setTimeout(resize, 150);
   });
 
   /* -------------------------- pointer ------------------------- */
@@ -396,7 +395,7 @@
   // expose a tiny hook so a future control surface can regenerate the field
   window.__flowforestHero = {
     settings: P,
-    regenerate: () => { needsRebuild = true; resize(); },
+    regenerate: () => resize(),
     pause: () => { paused = true; },
     play: () => { paused = false; }
   };

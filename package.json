@@ -1,0 +1,21 @@
+{
+  "name": "flowforest-website",
+  "version": "1.0.0",
+  "description": "Flowforest — static marketing site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "serve": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview --port 8000",
+    "check": "astro check && astro build"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "typescript": "^6.0.3"
+  },
+  "dependencies": {
+    "astro": "^7.3.2"
+  }
+}

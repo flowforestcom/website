@@ -2,27 +2,47 @@
 
 Static marketing site for [Flowforest](https://flowforest.com) — local-first tools that serve one person well.
 
-## Contents
+Built with [Astro](https://astro.build). Output is static; deploy `dist/` to any static host.
 
-- `index.html` — landing page
-- `style.css` — styles
-- `logo.svg`, `favicon.png`, `hero.png` — branding and hero artwork
-- `_headers` — security headers (Cloudflare Pages)
-- `r&d/hero-animated.html` — hero prototype: live canvas version of `hero.png`
-  (generated from `goodjobjohn/public/r&d/stipple_contours_1.html`) with animated
-  contours and pointer-hover warp. Standalone, not linked from `index.html`, and
-  marked `noindex`. Served at `/r&d/hero-animated.html` when previewing locally.
+## Structure
 
-## Local preview
-
-Open `index.html` in a browser, or serve the folder locally:
-
-```bash
-python3 -m http.server 8080
+```
+public/            served at the site root, copied to dist/ as-is
+  _headers         security headers (Cloudflare Pages)
+  logo.png, favicon.png, entropy.svg, …
+src/
+  layouts/Base.astro              head, header, footer
+  pages/index.astro               landing page
+  pages/flare/privacy-policy.astro
+  styles/global.css               all site styles
+  scripts/hero-contours.js        animated hero canvas
+r&d/hero-animated.html            hero prototype, excluded from the build
 ```
 
-Then visit http://localhost:8080
+## Commands
+
+```bash
+pnpm install
+pnpm dev       # http://127.0.0.1:8000
+pnpm build     # -> dist/
+pnpm preview   # serve the built output
+pnpm check     # astro check, then build
+```
+
+## Conventions
+
+- `trailingSlash: "always"` — every route is a directory with an index, so the
+  privacy policy is served at `/flare/privacy-policy/`. Internal links and the
+  canonical tags include the slash.
+- Assets live in `public/` and are referenced from the site root (`/logo.png`),
+  so they never pass through the build.
+- `r&d/` is excluded from the build by living outside `src/pages/` and is
+  excluded from type-checking in `tsconfig.json`.
+- The hero canvas is imported with a `<script>` tag in `index.astro`, not from
+  frontmatter: frontmatter runs on the server during the build, where `document`
+  does not exist.
 
 ## Deploy
 
-Static files only — deploy the repo root to any static host. The `_headers` file is used automatically on Cloudflare Pages.
+`pnpm build`, then deploy `dist/` to Cloudflare Pages. `_headers` is copied from
+`public/` into the build output and is picked up automatically.
