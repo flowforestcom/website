@@ -7,5 +7,7 @@ export default defineConfig({
   // house convention: every route gets a trailing slash
   trailingSlash: 'always',
   build: { format: 'directory' },
+  // keep copy exactly as written in Markdown: no curly-quote substitution
+  markdown: { smartypants: false },
   server: { port: 8000, host: '127.0.0.1' },
 });

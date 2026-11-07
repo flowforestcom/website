@@ -1,0 +1,77 @@
+---
+import { render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  product: CollectionEntry<'products'>;
+}
+
+const { product } = Astro.props;
+const { Content } = await render(product);
+const { name, step, lede, features, status, visual, link } = product.data;
+---
+
+<article class={`product product-${visual}`}>
+  <div class="product-copy">
+    <p class="product-number">{step}</p>
+    <h3>{name}</h3>
+    <p class="product-lede">{lede}</p>
+    <Content />
+    <ul class="product-details" aria-label={`${name} features`}>
+      {features.map((feature) => <li>{feature}</li>)}
+    </ul>
+    <p class="product-status">{status}</p>
+    {link && (
+      <p><a class="product-policy-link" href={link.href}>{link.label}</a></p>
+    )}
+  </div>
+
+  <div class={`product-visual ${visual}-visual`} aria-hidden="true">
+    {visual === 'flare' && (
+      <div class="flare-phone">
+        <div class="flare-phone-top"><span>Flare</span><i></i></div>
+        <p class="flare-transcript">
+          The tools should fade into the work, leaving the thought intact.
+        </p>
+        <div class="flare-wave">
+          <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+        </div>
+        <div class="flare-record"><span></span></div>
+        <small>Listening on device</small>
+      </div>
+    )}
+
+    {visual === 'runway' && (
+      <div class="runway-window">
+        <div class="runway-bar"><i></i><i></i><i></i><span>FIELD NOTES</span></div>
+        <div class="runway-body">
+          <div class="runway-sidebar">
+            <b>Today</b><span>Research</span><span>Projects</span><span>Archive</span>
+          </div>
+          <div class="runway-note">
+            <small>SEPTEMBER 23</small>
+            <strong>Finding the signal</strong>
+            <p>Ideas become useful when their relationships are visible.</p>
+            <div class="runway-link">↗ Local-first systems</div>
+            <div class="runway-link">↗ Working independently</div>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {visual === 'slate' && (
+      <div class="slate-page">
+        <div class="slate-date">
+          <small>WEDNESDAY</small><strong>23</strong><span>SEPTEMBER</span>
+        </div>
+        <p>Make room for<br /><em>what matters.</em></p>
+        <svg viewBox="0 0 320 90" role="presentation"
+          ><path
+            d="M8 65C42 18 66 78 103 48C139 19 157 70 191 42C216 21 236 34 250 51C266 69 286 60 313 22"
+          ></path></svg
+        >
+      </div>
+      <div class="slate-pencil"></div>
+    )}
+  </div>
+</article>

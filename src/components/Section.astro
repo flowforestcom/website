@@ -1,0 +1,88 @@
+---
+import { render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import Product from './Product.astro';
+
+interface Props {
+  section: CollectionEntry<'sections'>;
+  products: CollectionEntry<'products'>[];
+}
+
+const { section, products } = Astro.props;
+const { Content } = await render(section);
+const data = section.data;
+---
+
+{data.type === 'hero' && (
+  <>
+    <section class="hero">
+      <h1 class="tagline">
+        {data.lines.map((line, index) => (
+          <span class={`line line-${index + 1}`}>{line}</span>
+        ))}
+      </h1>
+      <p class="hero-sub">{data.sub}</p>
+    </section>
+
+    <section class="hero-mark-band" aria-hidden="true">
+      <div class="hero-icon">
+        <object
+          data="/entropy.svg"
+          type="image/svg+xml"
+          class="hero-mark"
+          tabindex="-1"></object>
+      </div>
+    </section>
+  </>
+)}
+
+{data.type === 'introduction' && (
+  <section class="introduction" aria-labelledby="introduction-title">
+    <p class="section-label">{data.eyebrow}</p>
+    <div class="introduction-copy">
+      <h2 id="introduction-title">{data.title}</h2>
+      <Content />
+    </div>
+  </section>
+)}
+
+{data.type === 'products' && (
+  <section class="products" aria-labelledby="products-title">
+    <header class="products-header">
+      <p class="section-label section-label-light">{data.eyebrow}</p>
+      <h2 id="products-title">{data.title}</h2>
+    </header>
+    {products.map((product) => <Product product={product} />)}
+  </section>
+)}
+
+{data.type === 'beliefs' && (
+  <section class="beliefs">
+    <p class="section-label">{data.eyebrow}</p>
+    <h2 class="beliefs-heading">{data.title}</h2>
+    <div class="beliefs-list"><Content /></div>
+  </section>
+)}
+
+{data.type === 'method' && (
+  <section class="method" aria-labelledby="method-title">
+    <div class="method-copy">
+      <p class="section-label">{data.eyebrow}</p>
+      <h2 id="method-title">{data.title}</h2>
+      <Content />
+    </div>
+    <div class="name-note">
+      {data.nameNote.map(({ term, note }) => (
+        <div><span>{term}</span><p>{note}</p></div>
+      ))}
+    </div>
+  </section>
+)}
+
+{data.type === 'boundaries' && (
+  <section class="boundaries" aria-labelledby="boundaries-title">
+    <p class="section-label section-label-light">{data.eyebrow}</p>
+    <h2 id="boundaries-title">{data.title}</h2>
+    <Content />
+  </section>
+)}
